@@ -93,10 +93,15 @@ header.nav{
   padding:9px 14px;border-radius:999px;white-space:nowrap;transition:.18s;
 }
 .navlinks a:hover{color:var(--text-strong);background:var(--surface)}
+.nav-toggle{display:none;flex-direction:column;justify-content:center;gap:5px;width:36px;height:36px;background:none;border:none;cursor:pointer;padding:0;flex-shrink:0}
+.nav-toggle span{display:block;width:100%;height:2px;background:var(--on-navy);border-radius:2px;transition:transform .2s ease,opacity .2s ease}
+.nav-toggle[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
+.nav-toggle[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
 /* ===== hero (dark, pinned video) ===== */
-.hero{position:relative;height:260vh}
-.hero-pin{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:flex-end;background:var(--navy-fill)}
+.hero{position:relative;height:260vh;height:260dvh}
+.hero-pin{position:sticky;top:0;height:100vh;height:100dvh;overflow:hidden;display:flex;align-items:flex-end;background:var(--navy-fill)}
 .hero-pin canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
 .hero-vignette{
   position:absolute;inset:0;z-index:1;pointer-events:none;
@@ -124,7 +129,7 @@ header.nav{
 .scroll-cue span::after{content:"";position:absolute;top:-100%;left:0;width:100%;height:100%;background:var(--clay-fill);animation:cueDrop 1.9s ease-in-out infinite}
 @keyframes cueDrop{0%{top:-100%}60%{top:100%}100%{top:100%}}
 @media (prefers-reduced-motion: reduce){
-  .hero{height:100vh}
+  .hero{height:100vh;height:100dvh}
   .scroll-cue span::after{animation:none;top:0}
 }
 @media(max-width:720px){
@@ -311,9 +316,15 @@ footer .fm{font-family:var(--font-mono);font-size:.76rem;letter-spacing:.04em}
 }
 
 /* ===== mobile nav calibration ===== */
-@media(max-width:640px){
-  .nav-inner{flex-wrap:wrap;row-gap:10px;padding:12px 16px}
-  .navlinks{width:100%;justify-content:flex-start}
+@media(max-width:760px){
+  .nav-inner{padding:12px 16px;flex-wrap:wrap}
+  .nav-toggle{display:flex}
+  .navlinks{
+    order:3;width:100%;flex-direction:column;gap:2px;
+    max-height:0;overflow:hidden;transition:max-height .25s ease;
+  }
+  .navlinks.open{max-height:420px;padding-top:6px}
+  .navlinks a{width:100%;padding:12px 14px;border-radius:10px}
 }
 
 </style>
@@ -327,7 +338,10 @@ footer .fm{font-family:var(--font-mono);font-size:.76rem;letter-spacing:.04em}
     <div class="brand">
       <span class="brand-word">Apinvest</span>
     </div>
-    <nav class="navlinks">
+    <button class="nav-toggle" id="navToggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navLinks">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="navlinks" id="navLinks">
       <a href="#activite">Activité</a>
       <a href="#produits">Produits</a>
       <a href="#abonnements">Abonnements</a>
@@ -814,6 +828,23 @@ footer .fm{font-family:var(--font-mono);font-size:.76rem;letter-spacing:.04em}
 </footer>
 
 <script>
+// mobile nav toggle
+(function(){
+  var toggle = document.getElementById('navToggle');
+  var links = document.getElementById('navLinks');
+  if(!toggle || !links) return;
+  toggle.addEventListener('click', function(){
+    var open = links.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  links.addEventListener('click', function(e){
+    if(e.target.tagName === 'A'){
+      links.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+
 // scroll progress
 var bar = document.getElementById('progress');
 function onScroll(){
